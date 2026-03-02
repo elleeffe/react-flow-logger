@@ -13,12 +13,18 @@ if (isDev && typeof window !== "undefined") {
   window.fetch = async (...args) => {
     emitLog({
       type: "fetch:start",
-      payload: { url: String(args[0]) }
+      payload: { url: String(args[0]) },
+      timestamp: Date.now()
     });
     const res = await originalFetch(...args);
     emitLog({
       type: "fetch:end",
-      payload: { url: String(args[0]), status: res.status }
+      payload: { 
+        url: String(args[0]), 
+        status: res.status, 
+        response: await res.clone().text() 
+      },
+      timestamp: Date.now()
     });
     return res;
   };
@@ -32,7 +38,8 @@ export function useStateLogger<T>(id: string, initial: T | (() => T)) {
     if(isDev) {
       emitLog({
         type: "useState",
-        payload: { id, next }
+        payload: { id, next },
+        timestamp: Date.now()
       });
     }
     setState(value);
@@ -46,7 +53,8 @@ export function useEffectLogger(id: string, effect: React.EffectCallback, deps: 
     if(isDev) {
       emitLog({
         type: "useEffect",
-        payload: { id, deps }
+        payload: { id, deps },
+        timestamp: Date.now()
       });
     }
     return effect();
@@ -61,9 +69,10 @@ export function withLogger<P extends object>(
     if(isDev) {
       emitLog({
         type: "render",
-        'payload': {
+        payload: {
           component: Component.displayName || Component.name || "Anonymous"
-        }
+        },
+        timestamp: Date.now()
       });
     }
     return <Component {...props} />;
@@ -76,18 +85,17 @@ export function useMemoLogger<T>(
   factory: () => T,
   deps: React.DependencyList
 ): T {
-  return React.useMemo(() => {
-    const value = factory();
+  const value = React.useMemo(() => factory(), deps);
 
-    if (isDev) {
-      emitLog({
-        type: "useMemo",
-        payload: { id, deps }
-      });
-    }
+  if (isDev) {
+    emitLog({
+      type: "useMemo",
+      payload: { id, deps, result: value },
+      timestamp: Date.now()
+    })
+  }
 
-    return value;
-  }, deps);
+  return value;
 }
 
 // --- Hook wrapper useCallback ---
@@ -101,7 +109,8 @@ export function useCallbackLogger<T extends (...args: any[]) => any>(
       if (isDev) {
         emitLog({
           type: "useCallback",
-          payload: { id, deps }
+          payload: { id, deps },
+          timestamp: Date.now()
         });
       }
     }

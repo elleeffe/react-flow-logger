@@ -38,6 +38,16 @@ const typeColors: Record<string, string> = {
   "fetch:end": "text-red-600",
 };
 
+// formatta timestamp in HH:MM:SS.mmm
+function formatTime(ts: number) {
+  const d = new Date(ts);
+  return (
+    d.toLocaleTimeString() +
+    "." +
+    String(d.getMilliseconds()).padStart(3, "0")
+  );
+}
+
 export default function App() {
   const [logs, setLogs] = useState<ReactFlowLog[]>([]);
   const bottomRef = useRef<HTMLDivElement>(null);
@@ -81,18 +91,22 @@ function LogLine({ log }: { log: ReactFlowLog }) {
   const color = typeColors[log.type] || "text-green-400";
   const entries = Object.entries(log.payload);
 
-  // Controllo sicuro per id
   const logId = "id" in log.payload ? (log.payload as any).id : "";
+  const time = formatTime(log.timestamp);
 
   return (
-    <div className="bg-gray-900 rounded px-2 py-1 border border-gray-800 hover:border-gray-600 transition-all">
-      <div
-        className={`cursor-pointer ${color} select-none`}
-        onClick={() => setOpen(!open)}
-      >
-        [{log.type}] {logId}
+    <div className="bg-gray-900 rounded px-2 py-1 border border-gray-800 hover:border-gray-600 transition-all flex flex-col gap-2">
+      {/* log principale cliccabile */}
+      <div className="w-full cursor-pointer flex justify-between flex-wrap gap-2" onClick={() => setOpen(!open)}>
+        <div className={`${color} select-none flex-1`}>
+          [{log.type}] {logId}
+        </div>
+
+        {/* timestamp a destra */}
+        <div className="text-gray-500 text-xs flex-shrink-0">{time}</div>
       </div>
 
+      {/* payload collassabile */}
       {open &&
         entries.map(([key, value]) => (
           <Collapsible key={key} label={key} value={value} />
