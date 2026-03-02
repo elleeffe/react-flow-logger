@@ -27,7 +27,9 @@ export function useStateLogger<T>(id: string, initial: T | (() => T)) {
   const [state, setState] = React.useState(initial);
   const wrappedSetState = (value: T | ((prev: T) => T)) => {
     const next = typeof value === "function" ? (value as Function)(state) : value;
-    console.log(`[React Flow Logger] useState ${id} change:`, next);
+    if(isDev) {
+      console.log(`[React Flow Logger] useState ${id} change:`, next);
+    }
     setState(value);
   };
   return [state, wrappedSetState] as const;
@@ -36,7 +38,9 @@ export function useStateLogger<T>(id: string, initial: T | (() => T)) {
 // --- Hook wrapper useEffect ---
 export function useEffectLogger(id: string, effect: React.EffectCallback, deps?: React.DependencyList) {
   React.useEffect(() => {
-    console.log(`[React Flow Logger] useEffect ${id} triggered`, deps);
+    if(isDev) {
+      console.log(`[React Flow Logger] useEffect ${id} triggered`, deps);
+    }
     return effect();
   }, deps);
 }
@@ -46,11 +50,50 @@ export function withLogger<P extends object>(
   Component: React.ComponentType<P>
 ) {
   return (props: P) => {
-    console.log(
-      `[React Flow Logger] Render component: ${
-        Component.displayName || Component.name || "Anonymous"
-      }`
-    );
+    if(isDev) {
+      console.log(
+        `[React Flow Logger] Render component: ${
+          Component.displayName || Component.name || "Anonymous"
+        }`
+      );
+    }
     return <Component {...props} />;
   };
+}
+
+// --- Hook wrapper useMemo ---
+export function useMemoLogger<T>(
+  id: string,
+  factory: () => T,
+  deps: React.DependencyList
+): T {
+  return React.useMemo(() => {
+    const value = factory();
+
+    if (isDev) {
+      console.log(
+        `[React Flow Logger] useMemo ${id} recalculated`,
+        deps
+      );
+    }
+
+    return value;
+  }, deps);
+}
+
+// --- Hook wrapper useCallback ---
+export function useCallbackLogger<T extends (...args: any[]) => any>(
+  id: string,
+  callback: T,
+  deps: React.DependencyList
+): T {
+  return React.useCallback((...args: any[]) => {
+    if (isDev) {
+      console.log(
+        `[React Flow Logger] useCallback ${id} invoked`,
+        deps
+      );
+    }
+    return callback(...args);
+  }, deps) as T;
 }
