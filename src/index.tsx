@@ -23,20 +23,20 @@ if (isDev && typeof window !== "undefined") {
 }
 
 // --- Hook wrapper useState ---
-export function useStateLogger<T>(initial: T | (() => T)) {
+export function useStateLogger<T>(id: string, initial: T | (() => T)) {
   const [state, setState] = React.useState(initial);
   const wrappedSetState = (value: T | ((prev: T) => T)) => {
     const next = typeof value === "function" ? (value as Function)(state) : value;
-    console.log("[React Flow Logger] useState change:", next);
+    console.log(`[React Flow Logger] useState ${id} change:`, next);
     setState(value);
   };
   return [state, wrappedSetState] as const;
 }
 
 // --- Hook wrapper useEffect ---
-export function useEffectLogger(effect: React.EffectCallback, deps?: React.DependencyList) {
+export function useEffectLogger(id: string, effect: React.EffectCallback, deps?: React.DependencyList) {
   React.useEffect(() => {
-    console.log("[React Flow Logger] useEffect triggered", deps);
+    console.log(`[React Flow Logger] useEffect ${id} triggered`, deps);
     return effect();
   }, deps);
 }
