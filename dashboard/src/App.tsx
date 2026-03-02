@@ -1,34 +1,102 @@
-import { useEffect, useState } from "react";
+// dashboard/src/App.tsx
+import { useEffect, useRef, useState } from "react";
+import type { ReactFlowLog } from "../../src/types";
 
-type Log = {
-  type: string;
-  payload: any;
-  timestamp: number;
+type CollapsibleProps = {
+  label: string;
+  value: unknown;
+};
+
+function Collapsible({ label, value }: CollapsibleProps) {
+  const [open, setOpen] = useState(false);
+  const isObject = typeof value === "object" && value !== null;
+
+  return (
+    <div className="ml-6 mt-1">
+      <div
+        className="cursor-pointer text-gray-400 hover:text-gray-100 select-none transition-colors"
+        onClick={() => setOpen(!open)}
+      >
+        {label}: {isObject ? (open ? "" : "{…}") : String(value)}
+      </div>
+      {open && isObject && (
+        <div className="ml-4 mt-1 p-2 bg-gray-900 rounded text-gray-300 border border-gray-700">
+          <pre className="whitespace-pre-wrap">{JSON.stringify(value, null, 2)}</pre>
+        </div>
+      )}
+    </div>
+  );
+}
+
+const typeColors: Record<string, string> = {
+  useState: "text-blue-400",
+  useEffect: "text-yellow-400",
+  useMemo: "text-purple-400",
+  useCallback: "text-pink-400",
+  render: "text-green-400",
+  "fetch:start": "text-red-400",
+  "fetch:end": "text-red-600",
 };
 
 export default function App() {
-  const [logs, setLogs] = useState<Log[]>([]);
+  const [logs, setLogs] = useState<ReactFlowLog[]>([]);
+  const bottomRef = useRef<HTMLDivElement>(null);
 
+  // Connetti WebSocket
   useEffect(() => {
-    const socket = new WebSocket("ws://localhost:5000");
+    const protocol = window.location.protocol === "https:" ? "wss" : "ws";
+    const socket = new WebSocket(`${protocol}://${window.location.host}`);
 
     socket.onmessage = (event) => {
-      const log = JSON.parse(event.data);
-      setLogs((prev) => [log, ...prev]);
+      const log: ReactFlowLog = JSON.parse(event.data);
+      setLogs((prev) => [...prev, log]);
     };
 
     return () => socket.close();
   }, []);
 
+  // Scroll automatico in fondo
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [logs]);
+
   return (
-    <div style={{ padding: 20, fontFamily: "monospace" }}>
-      <h1>React Flow Logger</h1>
-      {logs.map((log, i) => (
-        <div key={i} style={{ marginBottom: 10 }}>
-          <strong>{log.type}</strong>
-          <pre>{JSON.stringify(log.payload, null, 2)}</pre>
-        </div>
-      ))}
+    <div className="min-h-screen p-6 font-mono text-sm bg-black text-gray-100">
+      <div className="space-y-2">
+        {logs.map((log, i) => (
+          <LogLine key={i} log={log} />
+        ))}
+      </div>
+
+      {/* cursore lampeggiante terminale */}
+      <div ref={bottomRef} className="mt-2 flex items-center">
+        <span className="animate-pulse text-green-400">█</span>
+      </div>
+    </div>
+  );
+}
+
+function LogLine({ log }: { log: ReactFlowLog }) {
+  const [open, setOpen] = useState(false);
+  const color = typeColors[log.type] || "text-green-400";
+  const entries = Object.entries(log.payload);
+
+  // Controllo sicuro per id
+  const logId = "id" in log.payload ? (log.payload as any).id : "";
+
+  return (
+    <div className="bg-gray-900 rounded px-2 py-1 border border-gray-800 hover:border-gray-600 transition-all">
+      <div
+        className={`cursor-pointer ${color} select-none`}
+        onClick={() => setOpen(!open)}
+      >
+        [{log.type}] {logId}
+      </div>
+
+      {open &&
+        entries.map(([key, value]) => (
+          <Collapsible key={key} label={key} value={value} />
+        ))}
     </div>
   );
 }

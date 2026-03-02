@@ -1,3 +1,5 @@
+import { ReactFlowLog } from "./types";
+
 let socket: WebSocket | null = null;
 let queue: string[] = [];
 let isConnecting = false;
@@ -35,16 +37,15 @@ function connect() {
   };
 }
 
-export function emitLog(type: string, payload: any) {
+export function emitLog(log: ReactFlowLog) {
   if (typeof window === "undefined") return;
 
   const message = JSON.stringify({
-    type,
-    payload,
+    ...log,
     timestamp: Date.now(),
   });
 
-  console.log("[React Flow Logger]", type, payload);
+  console.log("[React Flow Logger]", log.type, log.payload);
 
   connect();
 

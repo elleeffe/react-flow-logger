@@ -11,9 +11,15 @@ if (isDev && typeof window !== "undefined") {
   // --- Intercetta fetch ---
   const originalFetch = window.fetch;
   window.fetch = async (...args) => {
-    emitLog("[React Flow Logger] FETCH START", args[0]);
+    emitLog({
+      type: "fetch:start",
+      payload: { url: String(args[0]) }
+    });
     const res = await originalFetch(...args);
-    emitLog("[React Flow Logger] FETCH END", {args: args[0], status: res.status});
+    emitLog({
+      type: "fetch:end",
+      payload: { url: String(args[0]), status: res.status }
+    });
     return res;
   };
 }
@@ -24,7 +30,10 @@ export function useStateLogger<T>(id: string, initial: T | (() => T)) {
   const wrappedSetState = (value: T | ((prev: T) => T)) => {
     const next = typeof value === "function" ? (value as Function)(state) : value;
     if(isDev) {
-      emitLog(`[React Flow Logger] useState ${id} change:`, next);
+      emitLog({
+        type: "useState",
+        payload: { id, next }
+      });
     }
     setState(value);
   };
@@ -32,12 +41,13 @@ export function useStateLogger<T>(id: string, initial: T | (() => T)) {
 }
 
 // --- Hook wrapper useEffect ---
-export function useEffectLogger(id: string, effect: React.EffectCallback, deps?: React.DependencyList) {
+export function useEffectLogger(id: string, effect: React.EffectCallback, deps: React.DependencyList) {
   React.useEffect(() => {
-    if(isDev) {emitLog(
-      "useEffect", 
-      {name: id, deps}
-    );
+    if(isDev) {
+      emitLog({
+        type: "useEffect",
+        payload: { id, deps }
+      });
     }
     return effect();
   }, deps);
@@ -49,10 +59,12 @@ export function withLogger<P extends object>(
 ) {
   return (props: P) => {
     if(isDev) {
-      emitLog(
-        "Render component", 
-        {name: Component.displayName || Component.name || "Anonymous"}
-      );
+      emitLog({
+        type: "render",
+        'payload': {
+          component: Component.displayName || Component.name || "Anonymous"
+        }
+      });
     }
     return <Component {...props} />;
   };
@@ -68,10 +80,10 @@ export function useMemoLogger<T>(
     const value = factory();
 
     if (isDev) {
-      emitLog(
-        "useMemo", 
-        {name: id, deps}
-      );
+      emitLog({
+        type: "useMemo",
+        payload: { id, deps }
+      });
     }
 
     return value;
@@ -87,10 +99,10 @@ export function useCallbackLogger<T extends (...args: any[]) => any>(
   return React.useCallback((...args: any[]) => {
     if (isDev) {
       if (isDev) {
-        emitLog(
-          "useCallback", 
-          {name: id, deps}
-        );
+        emitLog({
+          type: "useCallback",
+          payload: { id, deps }
+        });
       }
     }
     return callback(...args);
