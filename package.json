@@ -8,8 +8,14 @@
     "dist"
   ],
   "scripts": {
-    "build": "tsc",
-    "prepare": "tsc"
+    "build:lib": "tsc",
+    "build:server": "tsc -p tsconfig.server.json",
+    "build:dashboard": "pnpm --dir dashboard install && pnpm --dir dashboard run build && rm -rf dist/dashboard && mv dashboard/dist dist/dashboard",
+    "build": "rm -rf dist && pnpm run build:lib && pnpm run build:server && pnpm run build:dashboard",
+    "prepare": "pnpm run build"
+  },
+  "bin": {
+    "react-flow-logger": "dist/cli.js"
   },
   "repository": {
     "type": "git",
@@ -28,9 +34,16 @@
   },
   "homepage": "https://github.com/elleeffe/react-flow-logger#readme",
   "devDependencies": {
+    "@types/express": "^5.0.6",
     "@types/node": "^25.3.2",
     "@types/react": "^19.2.14",
+    "@types/ws": "^8.18.1",
     "react": "^19.2.4",
+    "tsx": "^4.21.0",
     "typescript": "^5.3.0"
+  },
+  "dependencies": {
+    "express": "^5.2.1",
+    "ws": "^8.19.0"
   }
 }
