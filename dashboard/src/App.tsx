@@ -8,6 +8,7 @@ import LogTypeFilter from "./components/LogTypeFilter";
 import type { HookThresholds } from "./components/ThresholdsModal";
 import { ThresholdsModal } from "./components/ThresholdsModal";
 import { DEFAULT_THRESHOLDS } from "./config";
+import { loadThresholds, saveThresholds } from "./utils";
 
 type DepsHistory = Record<string, { timestamp: number; deps: unknown[] }[]>;
 
@@ -45,8 +46,9 @@ export default function App() {
   const [logs, setLogs] = useState<ReactFlowLog[]>([]);
   const [filterTypes, setFilterTypes] = useState<ReactFlowLog["type"][]>([]);
   const [depsHistory, setDepsHistory] = useState<DepsHistory>({});
-  const [thresholds, setThresholds] =
-    useState<HookThresholds>(DEFAULT_THRESHOLDS);
+  const [thresholds, setThresholds] = useState<HookThresholds>(
+    () => loadThresholds() || DEFAULT_THRESHOLDS,
+  );
   const [showThresholdsModal, setShowThresholdsModal] = useState(false);
 
   const bottomRef = useRef<HTMLDivElement>(null);
@@ -92,6 +94,10 @@ export default function App() {
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [logs]);
+
+  useEffect(() => {
+    saveThresholds(thresholds);
+  }, [thresholds]);
 
   const visibleLogs =
     filterTypes.length === 0
