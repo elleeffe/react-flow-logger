@@ -1,3 +1,5 @@
+import type { DependencyList } from "react";
+
 export type BaseLog = {
 	timestamp: number; // sempre presente
 };
@@ -9,12 +11,12 @@ export type UseStateLog = BaseLog & {
 
 export type UseEffectLog = BaseLog & {
 	type: "useEffect";
-	payload: { id: string; deps?: unknown[] };
+	payload: { id: string; deps: DependencyList };
 };
 
 export type UseMemoLog = BaseLog & {
 	type: "useMemo";
-	payload: { id: string; deps: unknown[]; result?: unknown };
+	payload: { id: string; deps: DependencyList; result?: unknown };
 };
 
 export type FetchLog = BaseLog & {
@@ -22,9 +24,22 @@ export type FetchLog = BaseLog & {
 	payload: { url: string; status?: number; response?: string };
 };
 
+export type UseCallbackLog = BaseLog & {
+	type: "useCallback";
+	payload: { id: string; deps: DependencyList };
+};
+
+export type RenderLog = BaseLog & {
+	type: "render";
+	payload: { component: string };
+};
+
 export type ReactFlowLog =
 	| UseStateLog
 	| UseEffectLog
 	| UseMemoLog
 	| FetchLog
-	| { type: string; payload: any; timestamp: number }; // fallback generico
+	| UseCallbackLog
+	| RenderLog;
+
+export type ReactFlowLogType = ReactFlowLog["type"];
