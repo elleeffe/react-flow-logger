@@ -11,5 +11,5 @@ const serverPath = path.join(__dirname, "server/index.js");
 console.log("🚀 Starting React Flow Logger on http://localhost:5000");
 
 spawn("node", [serverPath], {
-	stdio: "inherit",
+  stdio: "inherit",
 });

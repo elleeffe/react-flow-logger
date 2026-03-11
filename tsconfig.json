@@ -1,16 +1,16 @@
 {
-	"compilerOptions": {
-		"target": "ES2019", // compatibile con browser moderni
-		"module": "ESNext", // output ESM
-		"moduleResolution": "Bundler", // per Vite/Next
-		"declaration": true, // genera .d.ts
-		"declarationMap": true,
-		"outDir": "dist", // output build
-		"rootDir": "src", // sorgenti
-		"strict": true,
-		"esModuleInterop": true,
-		"skipLibCheck": true,
-		"jsx": "react-jsx" // supporta JSX
-	},
-	"include": ["src"]
+  "compilerOptions": {
+    "target": "ES2019", // compatibile con browser moderni
+    "module": "ESNext", // output ESM
+    "moduleResolution": "Bundler", // per Vite/Next
+    "declaration": true, // genera .d.ts
+    "declarationMap": true,
+    "outDir": "dist", // output build
+    "rootDir": "src", // sorgenti
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "jsx": "react-jsx" // supporta JSX
+  },
+  "include": ["src"]
 }

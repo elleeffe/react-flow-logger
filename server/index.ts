@@ -11,7 +11,7 @@ const PORT = 5000;
 app.use(express.static(path.join(__dirname, "../dashboard")));
 
 const server = app.listen(PORT, () => {
-	console.log("React Flow Logger running on http://localhost:5000");
+  console.log("React Flow Logger running on http://localhost:5000");
 });
 
 const wss = new WebSocketServer({ server });
@@ -19,17 +19,17 @@ const wss = new WebSocketServer({ server });
 let clients: any[] = [];
 
 wss.on("connection", (ws) => {
-	clients.push(ws);
+  clients.push(ws);
 
-	ws.on("message", (message) => {
-		clients.forEach((client) => {
-			if (client.readyState === 1) {
-				client.send(message.toString());
-			}
-		});
-	});
+  ws.on("message", (message) => {
+    clients.forEach((client) => {
+      if (client.readyState === 1) {
+        client.send(message.toString());
+      }
+    });
+  });
 
-	ws.on("close", () => {
-		clients = clients.filter((c) => c !== ws);
-	});
+  ws.on("close", () => {
+    clients = clients.filter((c) => c !== ws);
+  });
 });
