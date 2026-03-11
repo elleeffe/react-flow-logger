@@ -19,3 +19,12 @@ export const typeColors: Record<string, string> = {
   "fetch:start": "text-red-400",
   "fetch:end": "text-red-600",
 };
+
+export const DEFAULT_THRESHOLDS = {
+  render: { warning: 2, danger: 5 }, // ms
+  useState: { warning: 1, danger: 3 },
+  useEffect: { warning: 1, danger: 3 },
+  useMemo: { warning: 1, danger: 3 },
+  useCallback: { warning: 1, danger: 3 },
+  fetch: { warning: 100, danger: 300 }, // fetch in ms
+};

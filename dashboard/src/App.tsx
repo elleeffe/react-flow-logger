@@ -5,6 +5,9 @@ import ClearLogsButton from "./components/ClearLogs";
 import Header from "./components/Header";
 import LogLine from "./components/LogLine";
 import LogTypeFilter from "./components/LogTypeFilter";
+import type { HookThresholds } from "./components/ThresholdsModal";
+import { ThresholdsModal } from "./components/ThresholdsModal";
+import { DEFAULT_THRESHOLDS } from "./config";
 
 type DepsHistory = Record<string, { timestamp: number; deps: unknown[] }[]>;
 
@@ -42,6 +45,9 @@ export default function App() {
   const [logs, setLogs] = useState<ReactFlowLog[]>([]);
   const [filterTypes, setFilterTypes] = useState<ReactFlowLog["type"][]>([]);
   const [depsHistory, setDepsHistory] = useState<DepsHistory>({});
+  const [thresholds, setThresholds] =
+    useState<HookThresholds>(DEFAULT_THRESHOLDS);
+  const [showThresholdsModal, setShowThresholdsModal] = useState(false);
 
   const bottomRef = useRef<HTMLDivElement>(null);
 
@@ -97,30 +103,49 @@ export default function App() {
       <Header>
         <div className="flex items-center gap-3 justify-between flex-wrap w-full lg:w-auto lg:flex-1">
           <LogTypeFilter selected={filterTypes} onChange={setFilterTypes} />
-          <ClearLogsButton
-            onClick={() => {
-              setLogs([]);
-              setDepsHistory({});
-            }}
-          />
+          <div className="flex items-center gap-3 flex-wrap">
+            <button
+              className="text-gray-400 hover:text-gray-200 font-semibold py-2 px-4 cursor-pointer border border-gray-700 text-xs"
+              type="button"
+              onClick={() => setShowThresholdsModal(true)}
+            >
+              Thresholds (ms)
+            </button>
+            <ClearLogsButton
+              onClick={() => {
+                setLogs([]);
+                setDepsHistory({});
+              }}
+            />
+          </div>
         </div>
       </Header>
-
+      {showThresholdsModal && (
+        <ThresholdsModal
+          thresholds={thresholds}
+          setThresholds={setThresholds}
+          onClose={() => setShowThresholdsModal(false)}
+          onReset={() => setThresholds(DEFAULT_THRESHOLDS)}
+        />
+      )}
       <div className="space-y-2 p-6">
-        {visibleLogs.map((log, i) => {
-          const prevDeps = getPrevDeps(log, depsHistory);
-
-          return (
-            <LogLine
-              key={`log-${log.timestamp}-${
-                // biome-ignore lint/suspicious/noArrayIndexKey: <explanation>
-                i
-              }`}
-              log={log}
-              prevDeps={prevDeps}
-            />
-          );
-        })}
+        {visibleLogs.map((log, i) => (
+          <LogLine
+            key={`log-${log.timestamp}-${
+              // biome-ignore lint/suspicious/noArrayIndexKey: <explanation>
+              i
+            }`}
+            log={log}
+            prevDeps={getPrevDeps(log, depsHistory)}
+            thresholds={
+              thresholds[
+                log.type === "fetch:end" || log.type === "fetch:start"
+                  ? "fetch"
+                  : log.type
+              ]
+            }
+          />
+        ))}
 
         {/* cursore lampeggiante terminale */}
         <div ref={bottomRef} className="mt-2 flex items-center">

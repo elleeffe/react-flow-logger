@@ -1,10 +1,19 @@
 import { useState } from "react";
-import type { RenderLog } from "../../../../src/types";
+import type { FetchLog, RenderLog, UseStateLog } from "../../../../src/types";
 import { typeColors } from "../../config";
-import { formatTime } from "../../utils";
 import Collapsible from "../Collapsible";
+import DurationLabel from "./DurationLabel";
 
-export default function RenderLogLine({ log }: { log: RenderLog }) {
+type Props = {
+  log: RenderLog | FetchLog | UseStateLog;
+  label: string;
+  thresholds: {
+    warning: number;
+    danger: number;
+  };
+};
+
+export default function SimpleLogLine({ log, label, thresholds }: Props) {
   const [open, setOpen] = useState(false);
   return (
     <div className="bg-gray-900 rounded px-2 py-1 border border-gray-800 hover:border-gray-600 transition-all flex flex-col gap-2">
@@ -14,12 +23,14 @@ export default function RenderLogLine({ log }: { log: RenderLog }) {
         type="button"
       >
         <div className={`${typeColors[log.type]} select-none flex-1`}>
-          [{log.type}] {log.payload.component}
+          {label}
         </div>
 
-        <div className="text-gray-500 text-xs flex-shrink-0">
-          {formatTime(log.timestamp)}
-        </div>
+        <DurationLabel
+          duration={log.duration}
+          timestamp={log.timestamp}
+          thresholds={thresholds}
+        />
       </button>
 
       {open &&

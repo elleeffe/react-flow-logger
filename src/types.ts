@@ -1,7 +1,8 @@
 import type { DependencyList } from "react";
 
 export type BaseLog = {
-  timestamp: number; // sempre presente
+  timestamp: number;
+  duration: number;
 };
 
 export type UseStateLog = BaseLog & {

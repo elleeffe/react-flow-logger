@@ -5,15 +5,19 @@ import type {
   UseMemoLog,
 } from "../../../../src/types";
 import { typeColors } from "../../config";
-import { formatTime } from "../../utils";
 import Collapsible from "../Collapsible";
+import DurationLabel from "./DurationLabel";
 
 type Props = {
   log: UseEffectLog | UseMemoLog | UseCallbackLog;
   prevDeps?: DependencyList;
+  thresholds: {
+    warning: number;
+    danger: number;
+  };
 };
 
-export default function LogLineWithDeps({ log, prevDeps }: Props) {
+export default function LogLineWithDeps({ log, prevDeps, thresholds }: Props) {
   const [open, setOpen] = useState(false);
   const deps = log.payload.deps;
 
@@ -42,9 +46,11 @@ export default function LogLineWithDeps({ log, prevDeps }: Props) {
           [{log.type}] {log.payload.id}
         </div>
 
-        <div className="text-gray-500 text-xs flex-shrink-0">
-          {formatTime(log.timestamp)}
-        </div>
+        <DurationLabel
+          duration={log.duration}
+          timestamp={log.timestamp}
+          thresholds={thresholds}
+        />
       </button>
 
       {open && (
