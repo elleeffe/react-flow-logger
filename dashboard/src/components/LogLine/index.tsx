@@ -1,23 +1,22 @@
+import type { DependencyList } from "react";
 import type { ReactFlowLog } from "../../../../src/types";
-import CallbackLogLine from "./CallbackLogLine";
-import EffectLogLine from "./EffectLogLine";
 import FetchLogLine from "./FetchLogLine";
-import MemoLogLine from "./MemoLogLine";
+import LogLineWithDeps from "./LogLineWithDeps";
 import RenderLogLine from "./RenderLogLine";
 import StateLogLine from "./StateLogLine";
 
-export default function LogLine({ log }: { log: ReactFlowLog }) {
+type Props = { log: ReactFlowLog; prevDeps?: DependencyList };
+
+export default function LogLine({ log, prevDeps }: Props) {
 	switch (log.type) {
 		case "render":
 			return <RenderLogLine log={log} />;
 		case "useState":
 			return <StateLogLine log={log} />;
 		case "useEffect":
-			return <EffectLogLine log={log} />;
 		case "useMemo":
-			return <MemoLogLine log={log} />;
 		case "useCallback":
-			return <CallbackLogLine log={log} />;
+			return <LogLineWithDeps log={log} prevDeps={prevDeps} />;
 		case "fetch:start":
 		case "fetch:end":
 			return <FetchLogLine log={log} />;

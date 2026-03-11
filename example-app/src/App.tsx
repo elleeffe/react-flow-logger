@@ -17,6 +17,10 @@ function App() {
 	const [loading, setLoading] = useStateLogger("loading", false);
 	const [error, setError] = useStateLogger<string | null>("error", null);
 
+	const [filter, setFilter] = useStateLogger("filter", "");
+	const [sortAsc, setSortAsc] = useStateLogger("sortAsc", true);
+	const [counter, setCounter] = useStateLogger("counter", 0);
+
 	const fetchPosts = useCallbackLogger("fetchPosts", async () => {
 		try {
 			setLoading(true);
@@ -27,7 +31,7 @@ function App() {
 			);
 
 			if (!res.ok) {
-				throw new Error("Errore nella risposta API");
+				throw new Error("Errore API");
 			}
 
 			const data: Post[] = await res.json();
@@ -43,29 +47,58 @@ function App() {
 		fetchPosts();
 	}, [fetchPosts]);
 
+	const filteredPosts = useMemoLogger("filteredPosts", () => {
+		return posts.filter((p) =>
+			p.title.toLowerCase().includes(filter.toLowerCase()),
+		);
+	}, [posts, filter]);
+
 	const sortedPosts = useMemoLogger("sortedPosts", () => {
-		return [...posts].sort((a, b) => a.title.localeCompare(b.title));
-	}, [posts]);
+		return [...filteredPosts].sort((a, b) =>
+			sortAsc ? a.title.localeCompare(b.title) : b.title.localeCompare(a.title),
+		);
+	}, [filteredPosts, sortAsc]);
+
+	const increment = useCallbackLogger("incrementCounter", () => {
+		setCounter((c) => c + 1);
+	}, [counter]);
 
 	return (
 		<div style={{ padding: 32, fontFamily: "sans-serif" }}>
-			<h1>React Flow Logger Test</h1>
+			<h1>React Flow Logger Playground</h1>
 
-			<button
-				onClick={fetchPosts}
+			<div style={{ marginBottom: 20 }}>
+				<button onClick={fetchPosts} type="button">
+					🔄 Fetch Posts
+				</button>
+
+				<button
+					onClick={() => setSortAsc((s) => !s)}
+					style={{ marginLeft: 10 }}
+					type="button"
+				>
+					Toggle Sort
+				</button>
+
+				<button onClick={increment} style={{ marginLeft: 10 }} type="button">
+					Counter: {counter}
+				</button>
+			</div>
+
+			<input
+				placeholder="Filter posts..."
+				value={filter}
+				onChange={(e) => setFilter(e.target.value)}
 				style={{
-					padding: "8px 16px",
+					padding: 8,
 					marginBottom: 20,
-					cursor: "pointer",
+					width: 300,
 				}}
-				type="button"
-			>
-				🔄 Ricarica
-			</button>
+			/>
 
-			{loading && <p>Caricamento...</p>}
+			{loading && <p>Loading...</p>}
 
-			{error && <p style={{ color: "red" }}>Errore: {error}</p>}
+			{error && <p style={{ color: "red" }}>{error}</p>}
 
 			{!loading && !error && (
 				<ul>

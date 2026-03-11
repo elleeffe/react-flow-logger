@@ -8,7 +8,7 @@
 		"dist"
 	],
 	"scripts": {
-		"dev": "concurrently \"tsx server/index.ts\" \"pnpm --dir dashboard dev\" \"pnpm --dir example-app dev\"",
+		"dev": "concurrently \"pnpm run dev:lib\" \"tsx server/index.ts\" \"pnpm --dir dashboard dev\" \"pnpm --dir example-app dev\"",
 		"dev:lib": "tsc --watch",
 		"build:lib": "tsc",
 		"build:server": "tsc -p tsconfig.server.json",

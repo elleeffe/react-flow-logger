@@ -1,9 +1,14 @@
 import { useState } from "react";
 import type { UseStateLog } from "../../../../src/types";
+import { typeColors } from "../../config";
+import { formatTime } from "../../utils";
 import Collapsible from "../Collapsible";
-import { formatTime, typeColors } from "./utils";
 
-export default function StateLogLine({ log }: { log: UseStateLog }) {
+type Props = {
+	log: UseStateLog;
+};
+
+export default function StateLogLine({ log }: Props) {
 	const [open, setOpen] = useState(false);
 	return (
 		<div className="bg-gray-900 rounded px-2 py-1 border border-gray-800 hover:border-gray-600 transition-all flex flex-col gap-2">

@@ -33,18 +33,24 @@ if (isDev && typeof window !== "undefined") {
 // --- Hook wrapper useState ---
 export function useStateLogger<T>(id: string, initial: T | (() => T)) {
 	const [state, setState] = React.useState(initial);
+
 	const wrappedSetState = (value: T | ((prev: T) => T)) => {
-		const next =
-			typeof value === "function" ? (value as Function)(state) : value;
-		if (isDev) {
-			emitLog({
-				type: "useState",
-				payload: { id, next },
-				timestamp: Date.now(),
-			});
-		}
-		setState(value);
+		setState((prev) => {
+			const next =
+				typeof value === "function" ? (value as (prev: T) => T)(prev) : value;
+
+			if (isDev) {
+				emitLog({
+					type: "useState",
+					payload: { id, prev, next },
+					timestamp: Date.now(),
+				});
+			}
+
+			return next;
+		});
 	};
+
 	return [state, wrappedSetState] as const;
 }
 

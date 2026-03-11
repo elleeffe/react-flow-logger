@@ -6,7 +6,7 @@ export type BaseLog = {
 
 export type UseStateLog = BaseLog & {
 	type: "useState";
-	payload: { id: string; next: unknown };
+	payload: { id: string; prev: unknown; next: unknown };
 };
 
 export type UseEffectLog = BaseLog & {

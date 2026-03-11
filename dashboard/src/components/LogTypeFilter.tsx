@@ -1,5 +1,7 @@
+import clsx from "clsx";
+import { useCallback } from "react";
 import type { ReactFlowLogType } from "../../../src/types";
-import { ALL_TYPES } from "../config";
+import { ALL_TYPES, typeColors } from "../config";
 
 type Props = {
 	selected: ReactFlowLogType[];
@@ -7,27 +9,29 @@ type Props = {
 };
 
 export default function LogTypeFilter({ selected, onChange }: Props) {
-	const toggleType = (type: ReactFlowLogType) => {
-		if (selected.includes(type)) {
-			onChange(selected.filter((t) => t !== type));
-		} else {
-			onChange([...selected, type]);
-		}
-	};
+	const toggleType = useCallback(
+		(type: ReactFlowLogType) => {
+			if (selected.includes(type)) {
+				onChange(selected.filter((t) => t !== type));
+			} else {
+				onChange([...selected, type]);
+			}
+		},
+		[onChange, selected],
+	);
 
-	const toggleClear = () => {
+	const toggleClear = useCallback(() => {
 		onChange([]);
-	};
+	}, [onChange]);
 
 	return (
 		<div className="flex flex-wrap gap-1">
 			<button
 				onClick={toggleClear}
-				className={`px-2 py-1 rounded-full text-xs font-medium transition ${
-					selected.length === 0
-						? "bg-green-500 text-black"
-						: "bg-gray-800 text-gray-400 hover:bg-gray-700"
-				}`}
+				className={clsx([
+					"px-2 py-1 rounded-full text-xs font-medium transition bg-gray-800 hover:bg-gray-700 cursor-pointer",
+					selected.length === 0 ? "text-green-400" : "text-gray-400",
+				])}
 				type="button"
 			>
 				All types
@@ -38,11 +42,10 @@ export default function LogTypeFilter({ selected, onChange }: Props) {
 					<button
 						key={type}
 						onClick={() => toggleType(type)}
-						className={`px-2 py-1 rounded-full text-xs font-medium transition ${
-							isSelected
-								? "bg-green-500 text-black"
-								: "bg-gray-800 text-gray-400 hover:bg-gray-700"
-						}`}
+						className={clsx([
+							"px-2 py-1 rounded-full text-xs font-medium transition cursor-pointer hover:bg-gray-700 bg-gray-800",
+							isSelected ? typeColors[type] : "text-gray-400",
+						])}
 						type="button"
 					>
 						{type}

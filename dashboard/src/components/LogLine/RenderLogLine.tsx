@@ -1,7 +1,8 @@
 import { useState } from "react";
 import type { RenderLog } from "../../../../src/types";
+import { typeColors } from "../../config";
+import { formatTime } from "../../utils";
 import Collapsible from "../Collapsible";
-import { formatTime, typeColors } from "./utils";
 
 export default function RenderLogLine({ log }: { log: RenderLog }) {
 	const [open, setOpen] = useState(false);

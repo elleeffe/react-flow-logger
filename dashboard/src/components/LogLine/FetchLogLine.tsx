@@ -1,7 +1,8 @@
 import { useState } from "react";
 import type { FetchLog } from "../../../../src/types";
+import { typeColors } from "../../config";
+import { formatTime } from "../../utils";
 import Collapsible from "../Collapsible";
-import { formatTime, typeColors } from "./utils";
 
 export default function FetchLogLine({ log }: { log: FetchLog }) {
 	const [open, setOpen] = useState(false);
